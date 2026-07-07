@@ -1,8 +1,12 @@
 name: 'xUnit Slack Reporter'
-description: 'Reports results of tests in xUnit to Slack channel.'
+description: 'Reports results of tests in xUnit to Slack channel, and outputs the posted message ts + channel.'
 author: Ivan Lee
 inputs: {}
-outputs: {}
+outputs:
+  ts:
+    description: 'Timestamp (ts) of the posted Slack message — use as thread_ts to thread replies/uploads under the report.'
+  channel:
+    description: 'Channel id the report was posted to.'
 runs:
   using: 'docker'
   image: 'Dockerfile'

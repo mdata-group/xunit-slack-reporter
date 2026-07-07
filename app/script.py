@@ -6,6 +6,23 @@ from app.utils import xunit_utils
 from app.utils import slack_utils
 
 
+def _write_github_output(response):
+    """Expose the posted message ts + channel as GitHub Action outputs so a
+    caller can thread follow-up uploads under the report."""
+    github_output = os.getenv("GITHUB_OUTPUT")
+    if not github_output or response is None:
+        return
+
+    ts = response.get("ts") if hasattr(response, "get") else None
+    channel = response.get("channel") if hasattr(response, "get") else None
+
+    with open(github_output, "a", encoding="utf-8") as file:
+        if ts:
+            file.write(f"ts={ts}\n")
+        if channel:
+            file.write(f"channel={channel}\n")
+
+
 def main():
     # Check input values.
     if constants.XUNIT_PATH_ENV_VAR not in os.environ and constants.XUNIT_PATH_GLOB_ENV_VAR not in os.environ:
@@ -88,16 +105,18 @@ def main():
         # If success, only send if configured.
         if not file_contains_failures:
             if not only_notify_on_issues:
-                slack_utils.send_slack_msg(
+                response = slack_utils.send_slack_msg(
                     os.getenv(constants.SLACK_CHANNEL_ENV_VAR),
                     attachments=[slack_attachment]
                 )
+                _write_github_output(response)
         # If error or failure.
         else:
-            slack_utils.send_slack_msg(
+            response = slack_utils.send_slack_msg(
                     os.getenv(constants.SLACK_CHANNEL_ENV_VAR),
                     attachments=[slack_attachment]
             )
+            _write_github_output(response)
             failed_tests = True
 
     # Return appropriate status code.
