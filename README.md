@@ -28,6 +28,7 @@ SLACK_TOKEN | (See Slack documentation) | Slack bot user token | Y |
 SLACK_CHANNEL | CKQ7C7KJN | Unique ID of slack channel to notify | Y |
 EXIT_CODE_FROM_REPORT | True/False | If present, will fail workflow if errors or failures are in the report | N |
 ONLY_NOTIFY_ON_ISSUES | True/False | If present, will only send notifications if errors or failures are found | N |
+TITLE_PREFIX | ⌚️ Apple Watch UI Tests | If present, rendered on its own line above the default title. Lets multiple reports in the same workflow be told apart | N |
 
 \* = Either XUNIT_PATH or XUNIT_GLOB must be provided.
 
