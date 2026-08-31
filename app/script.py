@@ -37,6 +37,7 @@ def main():
     # Load configs
     only_notify_on_issues = os.getenv(constants.ONLY_NOTIFY_ON_ISSUES_ENV_VAR, "false").lower() == 'true'
     exit_on_failure = os.getenv(constants.EXIT_ON_FAILURE_ENV_VAR, "false").lower() == 'true'
+    title_prefix = os.getenv(constants.TITLE_PREFIX_ENV_VAR, "")
 
     # Load XUnit report(s)
     xunit_path = os.getenv(constants.XUNIT_PATH_ENV_VAR, "")
@@ -55,12 +56,18 @@ def main():
         xunit_report = xunit_utils.read_xunit(file)
         file_contains_failures = bool(xunit_report.errors or xunit_report.failures)
 
+        # Optional caller-supplied prefix, rendered on its own line above the
+        # default title so multiple reports in the same workflow are
+        # distinguishable.
+        base_title = f"XUnit test results for {os.getenv('GITHUB_WORKFLOW')} on {os.getenv('GITHUB_REF')}"
+        title = f"{title_prefix}\n{base_title}" if title_prefix else base_title
+
         # Slack results
         slack_attachment = {
             "color": constants.PASS_COLOR,
             "author_name": "XUnit Slack Reporter",
             "author_link": f"https://github.com/{os.getenv('GITHUB_REPOSITORY')}/actions/runs/{os.getenv('GITHUB_RUN_ID')}",
-            "title": f"XUnit test results for {os.getenv('GITHUB_WORKFLOW')} on {os.getenv('GITHUB_REF')}",
+            "title": title,
             "fields": []
         }
 

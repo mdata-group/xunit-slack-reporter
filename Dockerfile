@@ -5,7 +5,10 @@
 
 # Base image
 # ---------------------------------------------------------------------- #
-FROM python:3.10.1
+# 3.10.13+ required: earlier 3.10 patches ship a tarfile.chown() without the
+# `tarinfo.gname` guard, which poetry >= 2.4.2 trips when it extracts sdists
+# (it nulls out uname/gname, then chown calls grp.getgrnam(None) as root).
+FROM python:3.10.21
 LABEL MAINTAINER="Ivan Lee"
 
 # Make working directory
@@ -17,7 +20,7 @@ WORKDIR /source
 # ---------------------------------------------------------------------- #
 COPY poetry.lock /source
 COPY pyproject.toml /source
-RUN pip install -U pip poetry
+RUN pip install -U pip poetry==2.4.2
 RUN poetry config virtualenvs.create false
 RUN poetry install --no-root 
 

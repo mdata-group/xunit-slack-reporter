@@ -32,6 +32,32 @@ def test_main_pytestfailure(monkeypatch, test_provisioning, mocker):  # noqa: F8
     assert len(slack_mock.call_args[1]['attachments'][0]['fields']) > 0
 
 
+def test_main_default_title(monkeypatch, test_provisioning, mocker):  # noqa: F811
+    monkeypatch.setenv("XUNIT_PATH", xunit_files.PYTEST_SUCCESS_FILE)
+    monkeypatch.setenv("GITHUB_WORKFLOW", "Unit Test")
+    monkeypatch.setenv("GITHUB_REF", "refs/heads/main")
+    monkeypatch.delenv("TITLE_PREFIX", raising=False)
+    slack_mock = mocker.patch("app.utils.slack_utils.send_slack_msg")
+
+    script.main()
+
+    title = slack_mock.call_args[1]['attachments'][0]['title']
+    assert title == "XUnit test results for Unit Test on refs/heads/main"
+
+
+def test_main_title_prefix(monkeypatch, test_provisioning, mocker):  # noqa: F811
+    monkeypatch.setenv("XUNIT_PATH", xunit_files.PYTEST_SUCCESS_FILE)
+    monkeypatch.setenv("GITHUB_WORKFLOW", "Unit Test")
+    monkeypatch.setenv("GITHUB_REF", "refs/heads/main")
+    monkeypatch.setenv("TITLE_PREFIX", "⌚️ Apple Watch UI Tests")
+    slack_mock = mocker.patch("app.utils.slack_utils.send_slack_msg")
+
+    script.main()
+
+    title = slack_mock.call_args[1]['attachments'][0]['title']
+    assert title == "⌚️ Apple Watch UI Tests\nXUnit test results for Unit Test on refs/heads/main"
+
+
 def test_main_mochasuccess(monkeypatch, test_provisioning, mocker):  # noqa: F811
     monkeypatch.setenv("XUNIT_PATH", xunit_files.MOCHA_SUCCESS_FILE)
     monkeypatch.setenv("GITHUB_WORKFLOW", "Unit Test")
